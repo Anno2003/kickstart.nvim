@@ -874,7 +874,7 @@ require('lazy').setup({
     branch = 'main',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local parsers = { 'bash', 'cpp', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
       require('nvim-treesitter').install(parsers)
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
@@ -948,5 +948,61 @@ require('lazy').setup({
   },
 })
 
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+-- ================
+-- Personal Edits
+-- ================
+vim.g.netrw_keepdir = 0
+vim.g.netrw_banner = 0
+vim.g.netrw_liststyle = 3
+vim.g.netrw_winsize = 25
+-- toggle file explorer
+vim.keymap.set('n', '<C-b>', function()
+  local netrw_exists = false
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.bo[buf].filetype == 'netrw' then
+      netrw_exists = true
+      break
+    end
+  end
+
+  if netrw_exists then
+    vim.cmd 'Lexplore' -- Ini bakal nutup kalau netrw sudah ada
+  else
+    local current_file_dir = vim.fn.expand '%:p:h'
+    -- Pastikan bukan buffer kosong/special sebelum buka
+    if current_file_dir ~= '' and current_file_dir ~= '.' then
+      vim.cmd('Lexplore ' .. current_file_dir)
+    else
+      vim.cmd 'Lexplore' -- Buka di CWD kalau file belum di-save
+    end
+  end
+end, { desc = 'Toggle Netrw in current file directory' })
+
+-- Move lines (Alt + Arrow Up/Down)
+-- Normal Mode
+vim.keymap.set('n', '<A-Down>', ':m .+1<CR>==', { desc = 'Move line down' })
+vim.keymap.set('n', '<A-Up>', ':m .-2<CR>==', { desc = 'Move line up' })
+
+-- Insert Mode
+vim.keymap.set('i', '<A-Down>', '<Esc>:m .+1<CR>==gi', { desc = 'Move line down' })
+vim.keymap.set('i', '<A-Up>', '<Esc>:m .-2<CR>==gi', { desc = 'Move line up' })
+
+-- Visual Mode (Bisa pindahin blok teks sekaligus)
+vim.keymap.set('v', '<A-Down>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+vim.keymap.set('v', '<A-Up>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+
+-- neovide config
+if vim.g.neovide then
+  vim.o.guifont = 'JetBrainsMono_Nerd_Font:h12'
+
+  vim.g.neovide_scale_factor = 1.0
+  local change_scale_factor = function(delta) vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta end
+
+  -- Ctrl + Scroll to change size (Mouse)
+  vim.keymap.set('n', '<C-ScrollWheelUp>', function() change_scale_factor(1.1) end)
+  vim.keymap.set('n', '<C-ScrollWheelDown>', function() change_scale_factor(1 / 1.1) end)
+  -- keyboard too
+  vim.keymap.set('n', '<C-=>', function() change_scale_factor(1.1) end)
+  vim.keymap.set('n', '<C-->', function() change_scale_factor(1 / 1.1) end)
+end
