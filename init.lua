@@ -513,8 +513,8 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
-        -- clangd = {},
-        ast_grep = {},
+        clangd = {},
+        -- ast_grep = {},
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
