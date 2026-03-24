@@ -513,17 +513,8 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
-        clangd = {
-          cmd = {
-            'clangd',
-            '--query-driver=D:/tools/Programming/MSYS2/ucrt64/bin/g++*', -- Path to your UCRT64 compiler
-            '--background-index',
-            '--clang-tidy',
-            '--header-insertion=iwyu',
-          },
-          root_dir = require('lspconfig.util').root_pattern('.clangd', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', '.git'),
-        },
-
+        -- clangd = {},
+        ast_grep = {},
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -967,13 +958,13 @@ end
 
 vim.keymap.set({ 'n', 't' }, '<c-`>', smart_terminal_toggle, { desc = 'Smart Terminal Toggle' })
 -- pwd always follow current active file
-vim.api.nvim_create_autocmd('BufEnter', {
-  callback = function()
-    local path = vim.fn.expand '%:p:h'
-    -- only change if real buffer (not empty or stuff)
-    if vim.fn.isdirectory(path) == 1 then vim.api.nvim_set_current_dir(path) end
-  end,
-})
+--vim.api.nvim_create_autocmd('BufEnter', {
+--  callback = function()
+--    local path = vim.fn.expand '%:p:h'
+--    -- only change if real buffer (not empty or stuff)
+--    if vim.fn.isdirectory(path) == 1 then vim.api.nvim_set_current_dir(path) end
+--  end,
+--})
 
 -- toggle file explorer
 vim.keymap.set('n', '<C-b>', function()
