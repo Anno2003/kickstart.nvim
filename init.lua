@@ -513,7 +513,17 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
-        -- clangd = {},
+        clangd = {
+          cmd = {
+            'clangd',
+            '--query-driver=D:/tools/Programming/MSYS2/ucrt64/bin/g++*', -- Path to your UCRT64 compiler
+            '--background-index',
+            '--clang-tidy',
+            '--header-insertion=iwyu',
+          },
+          root_dir = require('lspconfig.util').root_pattern('.clangd', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', '.git'),
+        },
+
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -816,8 +826,9 @@ require('lazy').setup({
 
           -- enables treesitter based folds
           -- for more info on folds see `:help folds`
-          -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-          -- vim.wo.foldmethod = 'expr'
+          vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+          vim.wo.foldmethod = 'expr'
+          vim.wo.foldlevel = 99
 
           -- enables treesitter based indentation
           vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
@@ -826,6 +837,15 @@ require('lazy').setup({
     end,
   },
 
+  {
+    'akinsho/toggleterm.nvim',
+    version = '*',
+    opts = {
+      open_mapping = [[<c-\>]], -- Default fallback
+      direction = 'horizontal', -- 'horizontal' 'vertical' 'float'
+      autochdir = true,
+    },
+  },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -882,6 +902,70 @@ vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 3
 vim.g.netrw_winsize = 25
 
+local tt = require 'toggleterm'
+local terminal_list = require 'toggleterm.terminal'
+
+-- ==================
+-- Terminal Profiles
+-- ==================
+local term_profiles = {
+  { name = 'Standard Shell', cmd = vim.o.shell },
+  {
+    name = 'MSYS2 UCRT64',
+    cmd = 'D:/Tools/Programming/MSYS2/msys2_shell.cmd -defterm -no-start -ucrt64',
+  },
+  { name = 'Python REPL', cmd = 'python3' },
+}
+
+local function smart_terminal_toggle()
+  local all_terms = terminal_list.get_all()
+  local any_open = false
+
+  -- Check if any terminal is currently visible/focused
+  for _, term in ipairs(all_terms) do
+    if term:is_open() then
+      any_open = true
+      term:toggle() -- Hide it if it's open
+    end
+  end
+
+  -- If no terminal was open, show the profile picker
+  if not any_open then
+    local pickers = require 'telescope.pickers'
+    local finders = require 'telescope.finders'
+    local conf = require('telescope.config').values
+    local actions = require 'telescope.actions'
+    local action_state = require 'telescope.actions.state'
+
+    pickers
+      .new({}, {
+        prompt_title = 'Terminal Profiles',
+        finder = finders.new_table {
+          results = term_profiles,
+          entry_maker = function(entry)
+            return {
+              value = entry,
+              display = entry.name,
+              ordinal = entry.name,
+            }
+          end,
+        },
+        sorter = conf.generic_sorter {},
+        attach_mappings = function(prompt_bufnr, map)
+          actions.select_default:replace(function()
+            actions.close(prompt_bufnr)
+            local selection = action_state.get_selected_entry()
+            -- Open the selected terminal
+            tt.exec(selection.value.cmd)
+          end)
+          return true
+        end,
+      })
+      :find()
+  end
+end
+
+vim.keymap.set({ 'n', 't' }, '<c-`>', smart_terminal_toggle, { desc = 'Smart Terminal Toggle' })
 -- pwd always follow current active file
 vim.api.nvim_create_autocmd('BufEnter', {
   callback = function()
