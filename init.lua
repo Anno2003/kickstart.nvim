@@ -513,7 +513,9 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
-        clangd = {},
+        clangd = {
+          cmd = { 'clangd', '--query-driver=D:\\tools\\Programming\\MSYS2\\ucrt64\\bin\\g++.exe' },
+        },
         -- ast_grep = {},
         -- gopls = {},
         -- pyright = {},
@@ -776,6 +778,8 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      require('mini.move').setup()
+
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
@@ -791,6 +795,12 @@ require('lazy').setup({
 
       -- ... and there is more!
       --  Check out: https://github.com/nvim-mini/mini.nvim
+      require('which-key').add {
+        { 's', group = '[S]urround', mode = { 'n', 'v' } },
+        { 'sa', desc = 'Add Surrounding' },
+        { 'sd', desc = 'Delete Surrounding' },
+        { 'sr', desc = 'Replace Surrounding' },
+      }
     end,
   },
 
@@ -958,13 +968,13 @@ end
 
 vim.keymap.set({ 'n', 't' }, '<c-`>', smart_terminal_toggle, { desc = 'Smart Terminal Toggle' })
 -- pwd always follow current active file
---vim.api.nvim_create_autocmd('BufEnter', {
---  callback = function()
---    local path = vim.fn.expand '%:p:h'
---    -- only change if real buffer (not empty or stuff)
---    if vim.fn.isdirectory(path) == 1 then vim.api.nvim_set_current_dir(path) end
---  end,
---})
+vim.api.nvim_create_autocmd('BufEnter', {
+  callback = function()
+    local path = vim.fn.expand '%:p:h'
+    -- only change if real buffer (not empty or stuff)
+    if vim.fn.isdirectory(path) == 1 then vim.api.nvim_set_current_dir(path) end
+  end,
+})
 
 -- toggle file explorer
 vim.keymap.set('n', '<C-b>', function()
@@ -990,19 +1000,6 @@ vim.keymap.set('n', '<C-b>', function()
   end
 end, { desc = 'Toggle Netrw in current file directory' })
 
--- Move lines (Alt + Arrow Up/Down)
--- Normal Mode
-vim.keymap.set('n', '<A-Down>', ':m .+1<CR>==', { desc = 'Move line down' })
-vim.keymap.set('n', '<A-Up>', ':m .-2<CR>==', { desc = 'Move line up' })
-
--- Insert Mode
-vim.keymap.set('i', '<A-Down>', '<Esc>:m .+1<CR>==gi', { desc = 'Move line down' })
-vim.keymap.set('i', '<A-Up>', '<Esc>:m .-2<CR>==gi', { desc = 'Move line up' })
-
--- Visual Mode (Bisa pindahin blok teks sekaligus)
-vim.keymap.set('v', '<A-Down>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
-vim.keymap.set('v', '<A-Up>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
-
 -- neovide config
 if vim.g.neovide then
   vim.o.guifont = 'JetBrainsMono_Nerd_Font:h12'
@@ -1016,4 +1013,8 @@ if vim.g.neovide then
   -- keyboard too
   vim.keymap.set('n', '<C-=>', function() change_scale_factor(1.1) end)
   vim.keymap.set('n', '<C-->', function() change_scale_factor(1 / 1.1) end)
+
+  vim.api.nvim_create_user_command('Explorer', 'silent !start explorer /select,%:p', { desc = 'Open File Explorer at current file' })
+
+  vim.keymap.set('n', '<C-A-r>', ':Explorer<CR>', { desc = 'Open File Explorer' })
 end
