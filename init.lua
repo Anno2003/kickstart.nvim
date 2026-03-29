@@ -778,11 +778,14 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      -- move line (even to sides!) Alt-hjkl
       require('mini.move').setup()
+      -- autopairs
+      require('mini.pairs').setup()
+      -- comments
+      require('mini.comment').setup()
 
       -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
       statusline.setup { use_icons = vim.g.have_nerd_font }
@@ -859,7 +862,6 @@ require('lazy').setup({
   -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommended keymaps
 
@@ -1016,5 +1018,5 @@ if vim.g.neovide then
 
   vim.api.nvim_create_user_command('Explorer', 'silent !start explorer /select,%:p', { desc = 'Open File Explorer at current file' })
 
-  vim.keymap.set('n', '<C-A-r>', ':Explorer<CR>', { desc = 'Open File Explorer' })
+  vim.keymap.set('n', '<C-M-r>', ':Explorer<CR>', { desc = 'Open File Explorer' })
 end
