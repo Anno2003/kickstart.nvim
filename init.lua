@@ -514,7 +514,13 @@ require('lazy').setup({
       ---@type table<string, vim.lsp.Config>
       local servers = {
         clangd = {
-          cmd = { 'clangd', '--query-driver=D:\\tools\\Programming\\MSYS2\\ucrt64\\bin\\g++.exe' },
+          cmd = {
+            'D:/Tools/Programming/MSYS2/ucrt64/bin/clangd.exe',
+            '--background-index',
+            '--query-driver=D:/tools/Programming/MSYS2/ucrt64/bin/g++.exe,D:/tools/Programming/MSYS2/ucrt64/bin/gcc.exe',
+            '--compile-commands-dir=./build',
+            '--header-insertion=never',
+          },
         },
         -- ast_grep = {},
         -- gopls = {},
@@ -1002,10 +1008,9 @@ vim.keymap.set('n', '<C-b>', function()
   end
 end, { desc = 'Toggle Netrw in current file directory' })
 
+vim.o.guifont = 'JetBrainsMono_Nerd_Font:h12'
 -- neovide config
 if vim.g.neovide then
-  vim.o.guifont = 'JetBrainsMono_Nerd_Font:h12'
-
   vim.g.neovide_scale_factor = 1.0
   local change_scale_factor = function(delta) vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta end
 
@@ -1019,4 +1024,21 @@ if vim.g.neovide then
   vim.api.nvim_create_user_command('Explorer', 'silent !start explorer /select,%:p', { desc = 'Open File Explorer at current file' })
 
   vim.keymap.set('n', '<C-M-r>', ':Explorer<CR>', { desc = 'Open File Explorer' })
+end
+
+-- neoray config
+if vim.g.neoray then
+  vim.cmd [[
+        NeoraySet CursorAnimTime 0.05
+        NeoraySet Transparency   1.00
+        NeoraySet TargetTPS      120
+        NeoraySet ContextMenu    TRUE
+        NeoraySet BoxDrawing     TRUE
+        NeoraySet ImageViewer    TRUE
+        NeoraySet WindowSize     100x40
+        NeoraySet WindowState    centered
+        NeoraySet KeyFullscreen  <M-C-CR>
+        NeoraySet KeyZoomIn      <C-ScrollWheelUp>
+        NeoraySet KeyZoomOut     <C-ScrollWheelDown>
+    ]]
 end
