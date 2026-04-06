@@ -114,7 +114,7 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 --
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -172,18 +172,6 @@ require('lazy').setup({
   { 'NMAC427/guess-indent.nvim', opts = {} },
 
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
-  -- If you prefer to call `setup` explicitly, use:
-  --    {
-  --        'lewis6991/gitsigns.nvim',
-  --        config = function()
-  --            require('gitsigns').setup({
-  --                -- Your gitsigns configuration here
-  --            })
-  --        end,
-  --    }
-  --
-  -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`.
   --
   -- See `:help gitsigns` to understand what the configuration keys do
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
@@ -532,8 +520,7 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
-
-        stylua = {}, -- Used to format Lua code
+        --stylua = {}, -- Used to format Lua code
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
@@ -618,6 +605,9 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        html = { 'prettier' },
+        javascript = { 'prettier' },
+        css = { 'prettier' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -847,14 +837,37 @@ require('lazy').setup({
     end,
   },
 
-  {
+  { -- toggleterm
     'akinsho/toggleterm.nvim',
     version = '*',
     opts = {
       open_mapping = [[<c-\>]], -- Default fallback
       direction = 'horizontal', -- 'horizontal' 'vertical' 'float'
       autochdir = true,
+      start_in_insert = true,
     },
+  },
+
+  { -- outline
+    'stevearc/aerial.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      require('aerial').setup {
+        -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+        on_attach = function(bufnr)
+          -- Jump forwards/backwards with '{' and '}'
+          vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', { buffer = bufnr })
+          vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', { buffer = bufnr })
+        end,
+      }
+      -- You probably also want to set a keymap to toggle aerial
+      vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
+    end,
   },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -921,7 +934,7 @@ local term_profiles = {
   { name = 'Standard Shell', cmd = vim.o.shell },
   {
     name = 'MSYS2 UCRT64',
-    cmd = 'D:/Tools/Programming/MSYS2/msys2_shell.cmd -defterm -no-start -ucrt64',
+    cmd = 'D:/Tools/Programming/MSYS2/msys2_shell.cmd -defterm -no-start -ucrt64 -here',
   },
   { name = 'Python REPL', cmd = 'python3' },
 }
@@ -965,7 +978,7 @@ local function smart_terminal_toggle()
             actions.close(prompt_bufnr)
             local selection = action_state.get_selected_entry()
             -- Open the selected terminal
-            tt.exec(selection.value.cmd)
+            tt.exec(selection.value.cmd, nil, nil, nil, nil, nil, false)
           end)
           return true
         end,
@@ -974,7 +987,7 @@ local function smart_terminal_toggle()
   end
 end
 
-vim.keymap.set({ 'n', 't' }, '<c-`>', smart_terminal_toggle, { desc = 'Smart Terminal Toggle' })
+vim.keymap.set({ 'n', 't' }, '<c-`>', smart_terminal_toggle, { desc = 'Open Terminal Picker' })
 -- pwd always follow current active file
 vim.api.nvim_create_autocmd('BufEnter', {
   callback = function()
@@ -1023,7 +1036,7 @@ if vim.g.neovide then
 
   vim.api.nvim_create_user_command('Explorer', 'silent !start explorer /select,%:p', { desc = 'Open File Explorer at current file' })
 
-  vim.keymap.set('n', '<C-M-r>', ':Explorer<CR>', { desc = 'Open File Explorer' })
+  vim.keymap.set('n', '<C-S-r>', ':Explorer<CR>', { desc = 'Open File Explorer' })
 end
 
 -- neoray config
